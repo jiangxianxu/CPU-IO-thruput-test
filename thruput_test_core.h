@@ -53,7 +53,7 @@ do {\
 #define THRUPUT_IXGE_TYPE_CMD_STR ("ixge")
 
 enum thruput_port_type {
-    THRUPUT_IGB = 1000,
+	THRUPUT_IGB = 1000,
 	THRUPUT_IXGE,
 	THRUPUT_INVALID,
 };
@@ -65,26 +65,29 @@ enum thruput_test_type {
 	THRUPUT_INVALID_TEST,
 };
 
-struct thruput_buf{
+struct thruput_buf {
 	dma_addr_t dma;
 	int len;
 	char buf[2048];
 };
 
-struct thruput_buf_info{
+struct thruput_buf_info {
 	struct thruput_buf buf[THRUPUT_BD_NUM];
 };
 
 struct thruput_ctrl;
 struct thruput_ops {
-	void (*dev_send)(struct thruput_ctrl *ctrl, struct thruput_buf_info *buf_info, int send_cnt);
-	void (*dev_send_clean)(struct thruput_ctrl *ctrl);
-	int  (*dev_recv)(struct thruput_ctrl *ctrl, struct thruput_buf_info *buf_info);
-    void (*dev_rx_que_init)(struct thruput_ctrl *ctrl, struct thruput_buf_info *buf_info);
-	void (*dev_irq_disable)(struct thruput_ctrl *ctrl);
-	int  (*dev_dma_map)(struct thruput_ctrl *ctrl);
-	int  (*dev_rx_que_num_get)(struct net_device *netdev);
-	int  (*dev_tx_que_num_get)(struct net_device *netdev);
+	void (*dev_send) (struct thruput_ctrl * ctrl,
+			  struct thruput_buf_info * buf_info, int send_cnt);
+	void (*dev_send_clean) (struct thruput_ctrl * ctrl);
+	int (*dev_recv) (struct thruput_ctrl * ctrl,
+			 struct thruput_buf_info * buf_info);
+	void (*dev_rx_que_init) (struct thruput_ctrl * ctrl,
+				 struct thruput_buf_info * buf_info);
+	void (*dev_irq_disable) (struct thruput_ctrl * ctrl);
+	int (*dev_dma_map) (struct thruput_ctrl * ctrl);
+	int (*dev_rx_que_num_get) (struct net_device * netdev);
+	int (*dev_tx_que_num_get) (struct net_device * netdev);
 };
 
 struct thruput_pkts_statistic {
@@ -101,19 +104,19 @@ struct thruput_statistic {
 };
 
 struct thruput_ctrl {
-    int task_num;
-    atomic_t refcnt;
-    struct net_device *netdev;
-    struct thruput_statistic *statistic;
-    struct thruput_ops ops;
-    enum thruput_port_type port_type;
-    enum thruput_test_type test_type;
-    struct thruput_buf_info buf_info[];/*需要分配rx_que_num个*/
+	int task_num;
+	atomic_t refcnt;
+	struct net_device *netdev;
+	struct thruput_statistic *statistic;
+	struct thruput_ops ops;
+	enum thruput_port_type port_type;
+	enum thruput_test_type test_type;
+	struct thruput_buf_info buf_info[];	/*需要分配rx_que_num个 */
 };
 
 struct thruput_tsk_arg {
-    int task_num;
-    struct thruput_ctrl *ctrl;
+	int task_num;
+	struct thruput_ctrl *ctrl;
 };
 
 struct thruput_start_arg {
@@ -124,21 +127,20 @@ struct thruput_start_arg {
 };
 
 struct thruput_fwd_ctrl {
-    struct thruput_ctrl *ctrl;
-    struct thruput_buf_info *buf_info;
+	struct thruput_ctrl *ctrl;
+	struct thruput_buf_info *buf_info;
 };
-
 
 static inline void thruput_ctrl_hold(struct thruput_ctrl *ctrl)
 {
 	atomic_inc(&ctrl->refcnt);
-    return;
+	return;
 }
 
 static inline void thruput_ctrl_put(struct thruput_ctrl *ctrl)
 {
 	atomic_dec(&ctrl->refcnt);
-    return;
+	return;
 }
 
 static inline bool thruput_ctrl_free_safe(struct thruput_ctrl *ctrl)
@@ -147,29 +149,17 @@ static inline bool thruput_ctrl_free_safe(struct thruput_ctrl *ctrl)
 }
 
 static inline void thruput_send_log
-(
-	int count,
-	int que_idx,
-	struct thruput_statistic *statis
-)
-{
+    (int count, int que_idx, struct thruput_statistic *statis) {
 	statis->pkts_statistic.tx_que_pkts[que_idx] += count;
-    statis->pkts_statistic.tx_pkts_distribut[count]++;
-    return;
+	statis->pkts_statistic.tx_pkts_distribut[count]++;
+	return;
 }
 
 static inline void thruput_recv_log
-(
-    int count,
-    int que_idx,
-    struct thruput_statistic *statis
-)
-{
+    (int count, int que_idx, struct thruput_statistic *statis) {
 	statis->pkts_statistic.rx_que_pkts[que_idx] += count;
-    statis->pkts_statistic.rx_pkts_distribut[count]++;
-    return;
+	statis->pkts_statistic.rx_pkts_distribut[count]++;
+	return;
 }
 
 #endif /*__THRUPUT_TEST_CORE_H__*/
-
-

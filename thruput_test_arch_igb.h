@@ -27,4 +27,3 @@ extern void thruput_igb_ops_init(struct thruput_ops *ops);
 extern int thruput_igb_rx_que_num_get(struct net_device *netdev);
 extern int thruput_igb_tx_que_num_get(struct net_device *netdev);
 #endif /*__THRUPUT_ARCH_IGB_H__*/
-

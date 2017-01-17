@@ -18,9 +18,9 @@
 
 struct thruput_common_ops {
 	enum thruput_port_type port_type;
-	void (*thruput_ops_init)(struct thruput_ops *ops);
-	int  (*thruput_rx_que_num_get)(struct net_device *dev);
-	int  (*thruput_tx_que_num_get)(struct net_device *dev);
+	void (*thruput_ops_init) (struct thruput_ops * ops);
+	int (*thruput_rx_que_num_get) (struct net_device * dev);
+	int (*thruput_tx_que_num_get) (struct net_device * dev);
 };
 
 struct thruput_common_port_type_map {
@@ -28,32 +28,18 @@ struct thruput_common_port_type_map {
 	enum thruput_port_type port_type;
 };
 
-
 extern int thruput_common_ops_init(struct thruput_ctrl *ctrl);
 extern void thruput_common_rx_que_reinit(struct thruput_fwd_ctrl *fwd_ctrl);
 extern int thruput_common_rx_que_num_get
-(
-	struct net_device *dev,
-	enum thruput_port_type port_type
-);
+    (struct net_device *dev, enum thruput_port_type port_type);
 extern int thruput_common_tx_que_num_get
-(
-	struct net_device *dev,
-	enum thruput_port_type port_type
-);
+    (struct net_device *dev, enum thruput_port_type port_type);
 extern void *thruput_common_test_func_get(enum thruput_test_type test_type);
 extern int thruput_common_task_num_get
-(
-	int tx_que_num,
-	int rx_que_num,
-	enum thruput_test_type test_type
-);
+    (int tx_que_num, int rx_que_num, enum thruput_test_type test_type);
 extern enum thruput_port_type thruput_common_get_port_type_by_str
-(
-	const char *port_type_str
-);
+    (const char *port_type_str);
 extern void thruput_common_dev_irq_dis(struct thruput_ctrl *ctrl);
 extern int thruput_common_dev_dma_map(struct thruput_ctrl *ctrl);
 
 #endif /*__THRUPUT_COMMON_H__*/
-
