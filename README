@@ -1,0 +1,4 @@
+ 编译说明：
+ 需要将本目录放到igb等intel驱动所在的同级目录下，并修改本目录中的Makefile文件，使其找到正确的kernel构建路径后，在本目录中make
+ make结束后将生成一个thruput.ko文件
+ insmod thruput.ko前先要保证igb.ko等网卡驱动已经在系统中加载
