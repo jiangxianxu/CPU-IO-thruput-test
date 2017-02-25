@@ -176,6 +176,12 @@ void thruput_common_dev_irq_dis(struct thruput_ctrl *ctrl)
 	return;
 }
 
+void thruput_common_dev_napi_stop(struct thruput_ctrl *ctrl)
+{
+	ctrl->ops.dev_napi_stop(ctrl);
+	return;
+}
+
 int thruput_common_dev_dma_map(struct thruput_ctrl *ctrl)
 {
 	return ctrl->ops.dev_dma_map(ctrl);

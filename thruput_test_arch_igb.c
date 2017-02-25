@@ -88,6 +88,28 @@ static void thruput_igb_irq_disable(struct thruput_ctrl *ctrl)
 	return;
 }
 
+static void thruput_igb_napi_stop(struct thruput_ctrl *ctrl)
+{
+	int i;
+	struct igb_adapter *adapter;
+
+	adapter = netdev_priv(ctrl->netdev);
+	for (i = 0; i < adapter->num_q_vectors; i++) {
+		if (adapter->q_vector[i]) {
+			printk("%s %d\n", __FUNCTION__, __LINE__);
+			napi_synchronize(&adapter->q_vector[i]->napi);
+			napi_disable(&adapter->q_vector[i]->napi);
+		}
+	}
+	del_timer_sync(&adapter->watchdog_timer);
+	if (adapter->flags & IGB_FLAG_DETECT_BAD_DMA)
+		del_timer_sync(&adapter->dma_err_timer);
+	del_timer_sync(&adapter->phy_info_timer);
+
+	printk("%s %d\n", __FUNCTION__, __LINE__);
+	return;
+}
+
 static void thruput_igb_send
     (struct thruput_ctrl *ctrl,
      struct thruput_buf_info *buf_info, int send_cnt) {
@@ -299,6 +321,7 @@ void thruput_igb_ops_init(struct thruput_ops *ops)
 	ops->dev_recv = thruput_igb_recv;
 	ops->dev_rx_que_init = thruput_igb_rx_que_reinit;
 	ops->dev_irq_disable = thruput_igb_irq_disable;
+	ops->dev_napi_stop = thruput_igb_napi_stop;
 	ops->dev_dma_map = thruput_igb_dma_map;
 	return;
 }

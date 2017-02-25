@@ -213,6 +213,7 @@ static void thruput_core_test_start(struct thruput_start_arg *arg)
 	dev_put(netdev);
 	netif_carrier_off(netdev);
 	netif_tx_stop_all_queues(netdev);
+	usleep_range(10000, 11000);
 	thruput_core_set_stop_flag(false);
 
 	rx_que_num = thruput_common_rx_que_num_get(netdev, arg->port_type);
@@ -252,7 +253,7 @@ static void thruput_core_test_start(struct thruput_start_arg *arg)
 		kfree(ctrl);
 		return;
 	}
-
+	thruput_common_dev_napi_stop(ctrl);
 	thruput_common_dev_irq_dis(ctrl);
 	thruput_core_statis_str_add_to_list(statistic);
 	for (i = 0; i < task_num; i++) {

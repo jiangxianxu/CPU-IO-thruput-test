@@ -85,6 +85,7 @@ struct thruput_ops {
 	void (*dev_rx_que_init) (struct thruput_ctrl * ctrl,
 				 struct thruput_buf_info * buf_info);
 	void (*dev_irq_disable) (struct thruput_ctrl * ctrl);
+	void (*dev_napi_stop) (struct thruput_ctrl * ctrl);
 	int (*dev_dma_map) (struct thruput_ctrl * ctrl);
 	int (*dev_rx_que_num_get) (struct net_device * netdev);
 	int (*dev_tx_que_num_get) (struct net_device * netdev);

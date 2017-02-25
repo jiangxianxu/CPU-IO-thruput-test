@@ -1,4 +1,6 @@
- 编译说明：
- 需要将本目录放到igb等intel驱动所在的同级目录下，并修改本目录中的Makefile文件，使其找到正确的kernel构建路径后，在本目录中make
- make结束后将生成一个thruput.ko文件
- insmod thruput.ko前先要保证igb.ko等网卡驱动已经在系统中加载
+说明：
+测试逻辑由顶层的thruput_test_core提供，实际的测试工作由arch层提供，顶层和arch层使用thruput_common公共层屏蔽。arch层与网卡硬件密切相关，它需要依赖对应的网卡驱动头文件才能编译，因此本程序对测试的网卡驱动有依赖。不同的网卡只需要实现arch层向common层提供的几个标准函数即可，后续增加网卡支持较为方便。 
+编译说明：
+要将本目录放到igb等intel驱动所在的同级目录下，并修改本目录中的Makefile文件，使其找到正确的kernel构建路径后，在本目录中make
+make结束后将生成一个thruput.ko文件
+insmod thruput.ko前先要保证igb.ko等网卡驱动已经在系统中加载

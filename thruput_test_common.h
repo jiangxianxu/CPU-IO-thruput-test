@@ -40,6 +40,7 @@ extern int thruput_common_task_num_get
 extern enum thruput_port_type thruput_common_get_port_type_by_str
     (const char *port_type_str);
 extern void thruput_common_dev_irq_dis(struct thruput_ctrl *ctrl);
+extern void thruput_common_dev_napi_stop(struct thruput_ctrl *ctrl);
 extern int thruput_common_dev_dma_map(struct thruput_ctrl *ctrl);
 
 #endif /*__THRUPUT_COMMON_H__*/
