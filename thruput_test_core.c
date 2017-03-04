@@ -217,7 +217,7 @@ static void thruput_core_test_start(struct thruput_start_arg *arg)
 	thruput_core_set_stop_flag(false);
 
 	rx_que_num = thruput_common_rx_que_num_get(netdev, arg->port_type);
-	tx_que_num = thruput_common_rx_que_num_get(netdev, arg->port_type);
+	tx_que_num = thruput_common_tx_que_num_get(netdev, arg->port_type);
 	task_num =
 	    thruput_common_task_num_get(tx_que_num, rx_que_num, arg->test_type);
 	ctrl_size =
