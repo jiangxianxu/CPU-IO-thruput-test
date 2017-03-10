@@ -1,6 +1,6 @@
 /*
  * 吞吐测试工具的IGB驱动ARCH层
- *
+ * 说明：其中关闭中断和寄存器读写代码来源于intel的IGB驱动
  * 作者:姜先绪<jiangxianxv@163.com>
  *
  * version:v0.1
