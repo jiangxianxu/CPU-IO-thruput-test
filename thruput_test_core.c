@@ -270,7 +270,7 @@ static void thruput_core_test_start(struct thruput_start_arg *arg)
 		thruput_ctrl_hold(ctrl);
 		pass_through_task =
 		    kthread_create(thruput_core_test_task, tsk_arg,
-				   "%s_tset[%d]", netdev->name, i);
+				   "%s_test", netdev->name);
 		kthread_bind(pass_through_task, i + 1);
 		wake_up_process(pass_through_task);
 	}
@@ -362,6 +362,7 @@ static ssize_t thruput_core_proc_write
      const char __user * buffer, size_t count, loff_t * data) {
 	s32 i, j = 0, k = 0;
 	char *argv[10];
+	char kbuffer[97];
 	char tmp[10][96];
 	struct thruput_start_arg start_arg;
 
@@ -372,17 +373,24 @@ static ssize_t thruput_core_proc_write
 	if (count > 96) {
 		count = 96;
 	}
+
+	memset(kbuffer, 0, sizeof(kbuffer));
+	if (copy_from_user(kbuffer, buffer, count)) {
+		printk("get test arg failed.");
+		return -1;
+	}
+
 	for (i = 0; i < 10; i++) {
 		argv[i] = tmp[i];
 	}
 	memset(tmp, 0, sizeof(tmp));
 	for (i = 0; i < (count - 1); i++) {
-		if (buffer[i] == ' ') {
+		if (kbuffer[i] == ' ') {
 			argv[j][k] = '\0';
 			k = 0;
 			j++;
 		} else {
-			argv[j][k] = buffer[i];
+			argv[j][k] = kbuffer[i];
 			k++;
 		}
 	}
