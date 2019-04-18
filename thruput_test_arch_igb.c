@@ -139,7 +139,7 @@ static void thruput_igb_send
 		}
 
 		tx_desc = IGB_TX_DESC(tx_ring, send_index);
-		tx_desc->read.buffer_addr = cpu_to_le64(buf_info->tx_buf[count].dma);
+		tx_desc->read.buffer_addr = cpu_to_le64(tx_buf[count].dma);
 		tx_desc->read.olinfo_status = cpu_to_le32((tx_buf[count].len) << E1000_ADVTXD_PAYLEN_SHIFT);
 		tx_desc->read.cmd_type_len = cpu_to_le32((cmd_type | (tx_buf[count].len)));
 		send_index = send_index_next;
