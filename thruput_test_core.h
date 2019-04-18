@@ -51,10 +51,12 @@ do {\
 
 #define THRUPUT_IGB_TYPE_CMD_STR ("igb")
 #define THRUPUT_IXGE_TYPE_CMD_STR ("ixge")
+#define THRUPUT_STMMAC_TYPE_CMD_STR ("stmmac")
 
 enum thruput_port_type {
 	THRUPUT_IGB = 1000,
 	THRUPUT_IXGE,
+	THRUPUT_STMMAC,
 	THRUPUT_INVALID,
 };
 
@@ -65,14 +67,23 @@ enum thruput_test_type {
 	THRUPUT_INVALID_TEST,
 };
 
-struct thruput_buf {
-	dma_addr_t dma;
-	int len;
+struct thruput_dma_buf {
 	char buf[2048];
 };
 
+struct thruput_desc_buf {
+	int len;
+	dma_addr_t dma;
+};
+
 struct thruput_buf_info {
-	struct thruput_buf buf[THRUPUT_BD_NUM];
+	struct thruput_desc_buf *rx_buf_curr;
+	struct thruput_desc_buf *rx_buf_fill_hw;
+	struct thruput_desc_buf tx_buf[THRUPUT_BD_NUM];
+	struct thruput_desc_buf rx_buf1[THRUPUT_BD_NUM];
+	struct thruput_desc_buf rx_buf2[THRUPUT_BD_NUM];
+	struct thruput_dma_buf dma_buf1[THRUPUT_BD_NUM];
+	struct thruput_dma_buf dma_buf2[THRUPUT_BD_NUM];
 };
 
 struct thruput_ctrl;

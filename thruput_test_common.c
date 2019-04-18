@@ -14,7 +14,28 @@
 #include "thruput_test_core.h"
 #include "thruput_test_common.h"
 #include "thruput_test_arch_igb.h"
-#include "thruput_test_config.h"
+#include "thruput_test_arch_stmmac.h"
+
+
+
+struct thruput_common_ops thruput_common_ops_tbl[] = {
+        {THRUPUT_IGB, thruput_igb_ops_init, thruput_igb_rx_que_num_get,
+         thruput_igb_tx_que_num_get},
+        {THRUPUT_STMMAC, thruput_stmmac_ops_init, thruput_stmmac_rx_que_num_get,
+         thruput_stmmac_tx_que_num_get},
+};
+#define THTUPUT_COMMON_OPS_TBL_NUM (sizeof(thruput_common_ops_tbl) / sizeof(struct thruput_common_ops))
+
+struct thruput_common_port_type_map thruput_common_port_type_map_tbl[] = {
+        {THRUPUT_IGB_TYPE_CMD_STR, THRUPUT_IGB},
+        {THRUPUT_STMMAC_TYPE_CMD_STR, THRUPUT_STMMAC},
+};
+#define THTUPUT_COMMON_PORT_TYPE_MAP_TBL_NUM \
+    (sizeof(thruput_common_port_type_map_tbl) / sizeof(struct thruput_common_port_type_map))
+
+
+
+
 
 static void thruput_common_test_send(struct thruput_fwd_ctrl *fwd_ctrl)
 {
@@ -30,12 +51,13 @@ static void thruput_common_test_send(struct thruput_fwd_ctrl *fwd_ctrl)
 
 static void thruput_common_test_recv(struct thruput_fwd_ctrl *fwd_ctrl)
 {
+    int count;
 	struct thruput_ctrl *ctrl;
 	struct thruput_buf_info *buf_info;
 
 	ctrl = fwd_ctrl->ctrl;
 	buf_info = fwd_ctrl->buf_info;
-	ctrl->ops.dev_recv(ctrl, buf_info);
+	count = ctrl->ops.dev_recv(ctrl, buf_info);
 	return;
 }
 
@@ -47,7 +69,6 @@ static void thruput_common_test_pass(struct thruput_fwd_ctrl *fwd_ctrl)
 
 	ctrl = fwd_ctrl->ctrl;
 	buf_info = fwd_ctrl->buf_info;
-
 	count = ctrl->ops.dev_recv(ctrl, buf_info);
 	if (count) {
 		ctrl->ops.dev_send(ctrl, buf_info, count);

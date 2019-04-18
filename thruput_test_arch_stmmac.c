@@ -78,7 +78,7 @@ static void thruput_stmmac_send
 		if (priv->extend_desc64) {
 			desc->des3 = (tx_buf[count].dma) >> 32;
 		}
-		priv->hw->desc->prepare_tx_desc(desc, 1, buf_info->tx_buf[count].len, 0, priv->mode);
+		priv->hw->desc->prepare_tx_desc(desc, 1, tx_buf[count].len, 0, priv->mode);
 		priv->hw->desc->close_tx_desc(desc);
 		priv->hw->desc->set_tx_owner(desc);
 		priv->hw->dma->enable_dma_transmission(priv->ioaddr);

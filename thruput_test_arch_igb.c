@@ -121,11 +121,13 @@ static void thruput_igb_send
 	struct net_device *netdev;
 	struct igb_adapter *adapter;
 	union e1000_adv_tx_desc *tx_desc;
+	struct thruput_desc_buf *tx_buf;
 
 	netdev = ctrl->netdev;
 	adapter = netdev_priv(netdev);
 	tx_ring = adapter->tx_ring[0];
 	send_index = tx_ring->next_to_use;
+	tx_buf = buf_info->tx_buf;
 	while (true) {
 		send_index_next = send_index + 1;
 		if (send_index_next >= tx_ring->count) {
@@ -137,13 +139,9 @@ static void thruput_igb_send
 		}
 
 		tx_desc = IGB_TX_DESC(tx_ring, send_index);
-		tx_desc->read.olinfo_status =
-		    cpu_to_le32((buf_info->buf[send_index].
-				 len) << E1000_ADVTXD_PAYLEN_SHIFT);
-		tx_desc->read.buffer_addr =
-		    cpu_to_le64(buf_info->buf[send_index].dma);
-		tx_desc->read.cmd_type_len =
-		    cpu_to_le32((cmd_type | (buf_info->buf[send_index].len)));
+		tx_desc->read.buffer_addr = cpu_to_le64(buf_info->tx_buf[count].dma);
+		tx_desc->read.olinfo_status = cpu_to_le32((tx_buf[count].len) << E1000_ADVTXD_PAYLEN_SHIFT);
+		tx_desc->read.cmd_type_len = cpu_to_le32((cmd_type | (tx_buf[count].len)));
 		send_index = send_index_next;
 		count++;
 		if (count >= send_cnt) {
@@ -206,27 +204,38 @@ static int thruput_igb_recv(struct thruput_ctrl *ctrl,
 	struct net_device *netdev;
 	struct igb_adapter *adapter;
 	union e1000_adv_rx_desc *rx_desc;
+	struct thruput_desc_buf *tx_buf;
+	struct thruput_desc_buf *rx_buf_curr;
+	struct thruput_desc_buf *rx_buf_fill_hw;
 
 	netdev = ctrl->netdev;
 	adapter = netdev_priv(netdev);
 	rx_ring = adapter->rx_ring[0];
 	clean_index = rx_ring->next_to_clean;
+	tx_buf = buf_info->tx_buf;
+	rx_buf_curr = buf_info->rx_buf_curr;
+	rx_buf_fill_hw = buf_info->rx_buf_fill_hw;
+
 	while (true) {
 		rx_desc = IGB_RX_DESC(rx_ring, clean_index);
 		if (!rx_desc->wb.upper.status_error) {
 			schedule();
 			break;
 		}
+
+		tx_buf[count].len = le16_to_cpu(rx_desc->wb.upper.length);
+		tx_buf[count].dma = rx_buf_curr[clean_index].dma;
+		rx_desc->read.hdr_addr = 0;
+		rx_desc->read.pkt_addr = rx_buf_fill_hw[clean_index].dma;
+        
+		count++;
 		clean_index++;
 		if (clean_index >= rx_ring->count) {
 			clean_index = 0;
+			buf_info->rx_buf_curr = rx_buf_fill_hw;
+			buf_info->rx_buf_fill_hw = rx_buf_curr;
+			break;
 		}
-
-		buf_info->buf[clean_index].len =
-		    le16_to_cpu(rx_desc->wb.upper.length);
-		rx_desc->read.hdr_addr = 0;
-		rx_desc->read.pkt_addr = buf_info->buf[clean_index].dma;
-		count++;
 		if (count > 24) {
 			break;
 		}
@@ -260,7 +269,7 @@ static void thruput_igb_rx_que_reinit
 	for (i = 0; i < rx_ring->count; i++) {
 		rx_desc = IGB_RX_DESC(rx_ring, i);
 		rx_desc->read.hdr_addr = 0;
-		rx_desc->read.pkt_addr = buf_info->buf[i].dma;
+		rx_desc->read.pkt_addr = buf_info->rx_buf_curr[i].dma;
 	}
 	return;
 }
@@ -272,7 +281,6 @@ static int thruput_igb_dma_map(struct thruput_ctrl *ctrl)
 	struct net_device *netdev;
 	struct igb_adapter *adapter;
 	struct thruput_buf_info *buf_info;
-	struct thruput_buf *buf;
 
 	netdev = ctrl->netdev;
 	adapter = netdev_priv(netdev);
@@ -281,15 +289,23 @@ static int thruput_igb_dma_map(struct thruput_ctrl *ctrl)
 	for (i = 0; i < ctrl->task_num; i++) {
 		buf_info = &(ctrl->buf_info[i]);
 		for (j = 0; j < THRUPUT_BD_NUM; j++) {
-			buf = &(buf_info->buf[j]);
-			buf->dma =
-			    dma_map_single(rx_ring->dev, buf->buf, 2048,
+			buf_info->rx_buf1[j].dma =
+			    dma_map_single(rx_ring->dev, buf_info->dma_buf1[j].buf, 2048,
 					   DMA_TO_DEVICE);
-			if (dma_mapping_error(rx_ring->dev, buf->dma)) {
+			if (dma_mapping_error(rx_ring->dev, buf_info->rx_buf1[j].dma)) {
+				THRUPUT_PRT("dma_mapping_error\n");
+				return (-1);
+			}
+			buf_info->rx_buf2[j].dma =
+			    dma_map_single(rx_ring->dev, buf_info->dma_buf2[j].buf, 2048,
+					   DMA_TO_DEVICE);
+			if (dma_mapping_error(rx_ring->dev, buf_info->rx_buf2[j].dma)) {
 				THRUPUT_PRT("dma_mapping_error\n");
 				return (-1);
 			}
 		}
+		buf_info->rx_buf_curr = buf_info->rx_buf1;
+		buf_info->rx_buf_fill_hw = buf_info->rx_buf2;
 	}
 	return 0;
 }
