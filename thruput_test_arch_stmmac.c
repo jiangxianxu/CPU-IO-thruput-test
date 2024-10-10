@@ -2,7 +2,6 @@
 
 /*
  * 吞吐测试工具的STMMAC驱动ARCH层
- * 作者:姜先绪<jiangxianxv@163.com>
  *
  * version:v0.1
  */

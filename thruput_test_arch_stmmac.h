@@ -1,8 +1,6 @@
 /*
  * 吞吐测试工具的ARCH层头文件
  *
- * 作者:姜先绪<jiangxianxv@163.com>
- *
  * version:v0.1
  */
 
